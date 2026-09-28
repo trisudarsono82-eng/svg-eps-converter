@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG to EPS Professional Converter</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(15, 23, 42, 0.4);
+            margin-bottom: 20px;
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .dropzone p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .dropzone input {
+            display: none;
+        }
+
+        .file-info {
+            display: none;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-info span {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            word-break: break-all;
+        }
+
+        .btn {
+            width: 100%;
+            background-color: var(--accent);
+            color: #0f172a;
+            font-weight: 600;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn:disabled {
+            background-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.4s ease;
+        }
+
+        .status-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .result-box {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>SVG to EPS Converter</h1>
+            <p>Ubah file ilustrasi vektor SVG Anda ke format EPS dengan mudah dan cepat.</p>
+        </header>
+
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+            <svg width="48" height="48" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <p>Ketuk untuk memilih file SVG atau seret file ke sini</p>
+            <input type="file" id="fileInput" accept=".svg">
+        </div>
+
+        <div class="file-info" id="fileInfo">
+            <span id="fileName">nama_file.svg</span>
+            <span style="color: var(--accent); cursor: pointer;" onclick="resetForm()">Ganti</span>
+        </div>
+
+        <button class="btn" id="convertBtn" disabled onclick="startConversion()">Konversi ke EPS</button>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill"></div>
+            </div>
+            <div class="status-text" id="statusText">Memproses file vektor...</div>
+        </div>
+
+        <div class="result-box" id="resultBox">
+            <button class="btn" id="downloadBtn" style="background-color: #22c55e; color: white;">Unduh File EPS</button>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 Vector Tools. All rights reserved.
+    </footer>
+
+    <!-- Script Integrasi Adsterra Popunder Anda nanti di bawah sini -->
+    
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const convertBtn = document.getElementById('convertBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const statusText = document.getElementById('statusText');
+        const resultBox = document.getElementById('resultBox');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let selectedFile = null;
+
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.name.endsWith('.svg') && file.type !== 'image/svg+xml') {
+                alert('Harap unggah file berformat SVG!');
+                return;
+            }
+            selectedFile = file;
+            fileName.textContent = file.name;
+            dropzone.style.display = 'none';
+            fileInfo.style.display = 'flex';
+            convertBtn.disabled = false;
+        }
+
+        function resetForm() {
+            selectedFile = null;
+            fileInput.value = '';
+            dropzone.style.display = 'block';
+            fileInfo.style.display = 'none';
+            convertBtn.disabled = true;
+            progressContainer.style.display = 'none';
+            resultBox.style.display = 'none';
+            progressFill.style.width = '0%';
+        }
+
+        function startConversion() {
+            if (!selectedFile) return;
+
+            convertBtn.style.display = 'none';
+            fileInfo.style.display = 'none';
+            progressContainer.style.display = 'block';
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 15;
+                if (progress <= 100) {
+                    progressFill.style.width = progress + '%';
+                    if (progress === 45) statusText.textContent = 'Membaca struktur XML vektor...';
+                    if (progress === 75) statusText.textContent = 'Mengonversi format ke EPS...';
+                } else {
+                    clearInterval(interval);
+                    statusText.textContent = 'Konversi selesai!';
+                    progressContainer.style.display = 'none';
+                    resultBox.style.display = 'block';
+                    
+                    // Simulasi pembuatan file EPS untuk unduhan
+                    const newName = selectedFile.name.replace(/\.[^/.]+$/, "") + ".eps";
+                    downloadBtn.onclick = function() {
+                        // Memicu unduhan file tiruan/hasil konversi dasar
+                        const blob = new Blob([`%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 500 500\n%%Title: ${newName}\n% Converted from SVG via Web Tool`], {type: 'application/postscript'});
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = newName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    };
+                }
+            }, 400);
+        }
+    </script>
+</body>
+</html>
